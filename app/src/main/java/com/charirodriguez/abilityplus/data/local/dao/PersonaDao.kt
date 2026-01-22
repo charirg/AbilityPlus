@@ -26,4 +26,8 @@ interface PersonaDao {
 
     @Query("SELECT * FROM persona WHERE activo = 1 ORDER BY apellidos ASC, nombre ASC")
     fun getActivas(): Flow<List<PersonaEntity>>
+
+    @Query("SELECT * FROM persona WHERE activo = 0 ORDER BY apellidos ASC, nombre ASC")
+    fun getEliminadas(): Flow<List<PersonaEntity>>
+
 }
