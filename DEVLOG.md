@@ -62,3 +62,64 @@
 - Añadir validaciones
 
 ---
+## Entrada 3
+- **Fecha:** 2026-01-28 (martes)
+- **Commit:** feat: persona crud + validations (expediente, fecha, edad)
+- **Zona tocada:** Persona, Room, MVVM, validaciones, UI
+
+### Qué hice
+- Implementé CRUD completo de Persona:
+  - Crear
+  - Editar
+  - Borrado lógico
+  - Restaurar
+  - Listado de activas y eliminadas
+- Añadí validaciones en el formulario.
+- Mejoré la experiencia de usuario al guardar.
+
+### Arquitectura aplicada
+- Room (Entity, Dao, Database)
+- Repository
+- ViewModel
+- Jetpack Compose
+
+Se mantiene separación:
+UI → ViewModel → Repository → Dao → Base de datos.
+
+### Campos actuales de Persona
+- id (PK autogenerada)
+- numeroExpediente (String, único)
+- sexo (M/F/X)
+- edadValoracion (Int?)
+- fechaNacimientoMillis (Long?)
+- activo (Boolean)
+
+### Validaciones
+- Número de expediente obligatorio (ViewModel).
+- Formato de fecha YYYY-MM-DD (formulario).
+- En edición se precargan los datos.
+- Si no se modifica la fecha, se conserva la existente.
+
+### Conversión de fechas
+- Texto → LocalDate → epoch millis (Long).
+- En listado: millis → dd/MM/yyyy.
+
+### Mejora de UX
+- Mensajes de error visibles.
+- Los datos no se pierden si hay error.
+- El formulario solo se cierra con datos válidos.
+
+### Problemas / bloqueos
+- Dudas sobre gestión de fechas y validaciones.
+
+### Solución / decisión tomada
+- Centralizar validaciones.
+- Usar borrado lógico.
+- Trabajar siempre con millis en base de datos.
+
+### Pendiente
+- Tablas semilla.
+- Relaciones con valoraciones.
+- Pulir UI.
+
+---
