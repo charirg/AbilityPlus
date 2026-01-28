@@ -26,17 +26,54 @@ class PersonaViewModel(
                 started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = emptyList()
             )
+    private val _errorMensaje = MutableStateFlow<String?>(null)
+    val errorMensaje = _errorMensaje.asStateFlow()
 
-    fun addPersona(nombre: String, apellidos: String?) {
-        viewModelScope.launch {
-            repo.addPersona(
-                PersonaEntity(
-                    nombre = nombre.trim(),
-                    apellidos = apellidos?.trim()?.takeIf { it.isNotBlank() }
-                )
-            )
+    private fun esFechaValida(texto: String): Boolean {
+        return try {
+            java.time.LocalDate.parse(texto)
+            true
+        } catch (e: Exception) {
+            false
         }
     }
+
+
+
+
+
+
+    fun addPersona(
+        numeroExpediente: String,
+        sexo: String?,
+        edadValoracion: Int?,
+        fechaNacimientoMillis: Long?
+    ) {
+        viewModelScope.launch {
+
+            if (numeroExpediente.isBlank()) {
+                _errorMensaje.value = "El número de expediente es obligatorio"
+                return@launch
+            }
+
+            _errorMensaje.value = null
+
+            repo.addPersona(
+                PersonaEntity(
+                    numeroExpediente = numeroExpediente.trim(),
+                    sexo = sexo,
+                    edadValoracion = edadValoracion,
+                    fechaNacimientoMillis = fechaNacimientoMillis
+                )
+            )
+            if (fechaNacimientoMillis == null && numeroExpediente.isNotBlank()) {
+                // Si el usuario escribió algo en fecha pero es inválido
+            }
+
+        }
+    }
+
+
 
     fun eliminarPersona(persona: PersonaEntity) {
         viewModelScope.launch {
@@ -69,16 +106,32 @@ class PersonaViewModel(
             repo.updatePersona(persona.copy(activo = true))
         }
     }
-    fun editarPersona(persona: PersonaEntity, nombre: String, apellidos: String?) {
-        viewModelScope.launch {
+    fun editarPersona(
+        persona: PersonaEntity,
+        numeroExpediente: String,
+        sexo: String?,
+        edadValoracion: Int?,
+        fechaNacimientoMillis: Long?
+    ) {
+        viewModelScope.launch {if (numeroExpediente.isBlank()) {
+            _errorMensaje.value = "El número de expediente es obligatorio"
+            return@launch
+        }
+
+            _errorMensaje.value = null
+
             repo.updatePersona(
                 persona.copy(
-                    nombre = nombre.trim(),
-                    apellidos = apellidos?.trim()?.takeIf { it.isNotBlank() }
+                    numeroExpediente = numeroExpediente.trim(),
+                    sexo = sexo,
+                    edadValoracion = edadValoracion,
+                    fechaNacimientoMillis = fechaNacimientoMillis
                 )
             )
         }
     }
+
+
 
 
 

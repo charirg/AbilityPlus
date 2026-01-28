@@ -9,7 +9,7 @@ import com.charirodriguez.abilityplus.data.local.entity.PersonaEntity
 
 @Database(
     entities = [PersonaEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AbilityPlusDatabase : RoomDatabase() {
@@ -26,7 +26,10 @@ abstract class AbilityPlusDatabase : RoomDatabase() {
                     context.applicationContext,
                     AbilityPlusDatabase::class.java,
                     "abilityplus.db"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration()
+
+                    .build()
 
                 INSTANCE = instance
                 instance

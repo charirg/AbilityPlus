@@ -24,10 +24,11 @@ interface PersonaDao {
     @Query("SELECT * FROM persona WHERE id = :id")
     suspend fun getById(id: Long): PersonaEntity?
 
-    @Query("SELECT * FROM persona WHERE activo = 1 ORDER BY apellidos ASC, nombre ASC")
+    @Query("SELECT * FROM persona WHERE activo = 1 ORDER BY numeroExpediente ASC")
     fun getActivas(): Flow<List<PersonaEntity>>
 
-    @Query("SELECT * FROM persona WHERE activo = 0 ORDER BY apellidos ASC, nombre ASC")
+    @Query("SELECT * FROM persona WHERE activo = 0 ORDER BY numeroExpediente ASC")
     fun getEliminadas(): Flow<List<PersonaEntity>>
 
 }
+

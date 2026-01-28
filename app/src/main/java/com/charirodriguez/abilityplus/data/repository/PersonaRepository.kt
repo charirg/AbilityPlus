@@ -16,7 +16,6 @@ class PersonaRepository(
     suspend fun deletePersona(persona: PersonaEntity) = personaDao.delete(persona)
 
     suspend fun getPersonaById(id: Long): PersonaEntity? = personaDao.getById(id)
-
     fun getPersonasEliminadas(): Flow<List<PersonaEntity>> = personaDao.getEliminadas()
 
 }
