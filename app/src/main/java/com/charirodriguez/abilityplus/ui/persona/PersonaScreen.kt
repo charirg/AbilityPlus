@@ -18,10 +18,13 @@ import java.time.format.DateTimeFormatter
 
 
 @Composable
-fun PersonaScreen(viewModel: PersonaViewModel) {
-    val errorMensaje by viewModel.errorMensaje.collectAsState()
+fun PersonaScreen(
+    viewModel: PersonaViewModel,
+    onIrPerfilFuncional: (Long) -> Unit
+) {
     var mostrandoFormulario by remember { mutableStateOf(false) }
     var personaEnEdicion by remember { mutableStateOf<PersonaEntity?>(null) }
+    val errorMensaje by viewModel.errorMensaje.collectAsState()
 
     if (mostrandoFormulario) {
         PersonaForm(
@@ -32,26 +35,16 @@ fun PersonaScreen(viewModel: PersonaViewModel) {
                 if (editando == null) {
                     viewModel.addPersona(numeroExpediente, sexo, edadValoracion, fechaNacimientoMillis)
                 } else {
-                    viewModel.editarPersona(
-                        editando,
-                        numeroExpediente,
-                        sexo,
-                        edadValoracion,
-                        fechaNacimientoMillis
-                    )
+                    viewModel.editarPersona(editando, numeroExpediente, sexo, edadValoracion, fechaNacimientoMillis)
                 }
-                if (numeroExpediente.isNotBlank()) {
-                    personaEnEdicion = null
-                    mostrandoFormulario = false
-                }
-
+                personaEnEdicion = null
+                mostrandoFormulario = false
             },
             onCancelar = {
                 personaEnEdicion = null
                 mostrandoFormulario = false
             }
         )
-
     } else {
         PersonaList(
             viewModel = viewModel,
@@ -62,6 +55,9 @@ fun PersonaScreen(viewModel: PersonaViewModel) {
             onEditar = { persona ->
                 personaEnEdicion = persona
                 mostrandoFormulario = true
+            },
+            onIrPerfil = { personaId ->
+                onIrPerfilFuncional(personaId)
             }
         )
     }
@@ -71,13 +67,11 @@ fun PersonaScreen(viewModel: PersonaViewModel) {
 private fun PersonaList(
     viewModel: PersonaViewModel,
     onNuevaPersona: () -> Unit,
-    onEditar: (PersonaEntity) -> Unit
-)
-
-{
+    onEditar: (PersonaEntity) -> Unit,
+    onIrPerfil: (Long) -> Unit
+) {
     val personas by viewModel.personasMostradas.collectAsState()
     val mostrarEliminadas by viewModel.mostrarEliminadas.collectAsState()
-
 
     Column(
         modifier = Modifier
@@ -101,24 +95,25 @@ private fun PersonaList(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-
         LazyColumn {
             items(personas) { persona ->
                 PersonaItem(
                     persona = persona,
                     onEliminar = { viewModel.eliminarPersona(it) },
                     onRestaurar = { viewModel.restaurarPersona(it) },
-                    onEditar = { onEditar(it) }
+                    onEditar = { onEditar(it) },
+                    onIrPerfil = { onIrPerfil(it) }
                 )
-
             }
         }
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PersonaForm(
+
+ fun PersonaForm(
     personaInicial: PersonaEntity?,
     errorMensaje: String?,
     onGuardar: (numeroExpediente: String, sexo: String?, edadValoracion: Int?, fechaNacimientoMillis: Long?) -> Unit,
@@ -270,7 +265,8 @@ private fun PersonaForm(
                     onGuardar(numeroExpediente.trim(), sexo, edadValoracion, fechaMillis)
                 },
 
-                        enabled = true
+                enabled = numeroExpediente.isNotBlank()
+
             ) {
                 Text("Guardar")
             }
@@ -282,13 +278,13 @@ private fun PersonaForm(
     }
 }
 
-
 @Composable
 private fun PersonaItem(
     persona: PersonaEntity,
     onEliminar: (PersonaEntity) -> Unit,
     onRestaurar: (PersonaEntity) -> Unit,
-    onEditar: (PersonaEntity) -> Unit
+    onEditar: (PersonaEntity) -> Unit,
+    onIrPerfil: (Long) -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -303,48 +299,25 @@ private fun PersonaItem(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
-                Text(
-                    text = persona.numeroExpediente,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                persona.sexo?.let {
-                    Text(
-                        text = "Sexo: $it",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-                persona.edadValoracion?.let {
-                    Text(
-                        text = "Edad: $it",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-                persona.fechaNacimientoMillis?.let { millis ->
-                    val fecha = Instant.ofEpochMilli(millis)
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDate()
-
-                    Text(
-                        text = "Nacimiento: ${
-                            fecha.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-                        }",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-
-
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = persona.numeroExpediente, style = MaterialTheme.typography.titleMedium)
             }
 
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = { onIrPerfil(persona.id) }) {
+                    Text("Perfil")
+                }
 
-            if (persona.activo) {
-                TextButton(onClick = { onEliminar(persona) }) { Text("Eliminar") }
-            } else {
-                TextButton(onClick = { onRestaurar(persona) }) { Text("Restaurar") }
+                if (persona.activo) {
+                    TextButton(onClick = { onEliminar(persona) }) { Text("Eliminar") }
+                } else {
+                    TextButton(onClick = { onRestaurar(persona) }) { Text("Restaurar") }
+                }
             }
         }
     }
 }
+
 
 
 
