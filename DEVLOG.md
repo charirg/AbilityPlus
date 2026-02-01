@@ -123,3 +123,16 @@ UI → ViewModel → Repository → Dao → Base de datos.
 - Pulir UI.
 
 ---
+## Entrada
+- **Fecha:** 2026-02-01
+- **Commit:** feat: navegación estable + perfil funcional persistente (CIE/CIF/AVD)
+- **Zona tocada:** navegación, Room, persona, perfil funcional
+
+### Qué hice
+- Navegación coherente: login falso → expedientes (Room) → datos personales → perfil funcional → volver.
+- CRUD de Persona funcionando (datos personales).
+- Perfil funcional por persona persistente:
+    - CIE guardado y marcado visualmente.
+    - CIF guardado y marcado; límite de 5 y aviso en rojo al intentar seleccionar una 6ª.
+    - AVD sin tareas: semáforo (verde/amarillo/rojo) por actividad guardado y persistente.
+- Botones corregidos: “Volver a datos personales” y “Guardar perfil funcional” (vuelve a Expedientes).
