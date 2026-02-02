@@ -136,3 +136,28 @@ UI → ViewModel → Repository → Dao → Base de datos.
     - CIF guardado y marcado; límite de 5 y aviso en rojo al intentar seleccionar una 6ª.
     - AVD sin tareas: semáforo (verde/amarillo/rojo) por actividad guardado y persistente.
 - Botones corregidos: “Volver a datos personales” y “Guardar perfil funcional” (vuelve a Expedientes).
+
+## Entrada
+- **Fecha:** 2026-02-01
+- **Commit:** feat: perfil funcional completo con evaluación y PDF
+- **Zona tocada:** perfil funcional, Room, navegación, UI, generación PDF
+
+### Qué hice
+- Completé la implementación del Perfil Funcional asociado a cada persona.
+- Añadí selección de diagnóstico CIE-10 (uno por persona).
+- Añadí selección múltiple de funcionalidades CIF con límite y persistencia.
+- Implementé evaluación de AVD mediante semáforo (rojo, amarillo, verde).
+- Guardé todas las selecciones y valoraciones en Room.
+- Implementé cálculo automático del resultado según número de rojos, amarillos y verdes.
+- Generé informe PDF resumen de la valoración.
+- Estabilicé la navegación: login → expedientes → datos personales → perfil funcional → volver/finalizar.
+- Corregí errores de KSP, imports, factories de ViewModel e inicialización de base de datos.
+- Realicé pequeños ajustes de UI para mejorar legibilidad.
+
+### Estado actual
+- La app permite crear expedientes, introducir datos personales, realizar valoración funcional completa y obtener un resultado con informe exportable.
+
+### Pendiente
+- Revisión general.
+- Pequeñas mejoras estéticas.
+- Preparación de documentación, presentación y vídeo.
