@@ -12,6 +12,7 @@ import com.charirodriguez.abilityplus.data.local.entity.seed.FuncionalidadCifEnt
 import com.charirodriguez.abilityplus.ui.avd.AvdScreen
 import com.charirodriguez.abilityplus.ui.cif.FuncionalidadCifScreen
 import com.charirodriguez.abilityplus.ui.diagnostico.DiagnosticosScreen
+import com.charirodriguez.abilityplus.ui.avd.ResultadoAvd
 
 
 
@@ -30,8 +31,12 @@ fun PerfilFuncionalScreen(
     onToggleCif: (String) -> Unit,
     cifError: String?,
     onVolverDatosPersonales: () -> Unit,
-    onFinalizar: () -> Unit
-) {
+    resultadoAvd: com.charirodriguez.abilityplus.ui.avd.ResultadoAvd,
+    onFinalizar: () -> Unit,
+    onGenerarInforme: () -> Unit,
+
+
+    ) {
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Perfil funcional") }) }
@@ -121,7 +126,42 @@ fun PerfilFuncionalScreen(
             }
 
             // ---- AVD ----
+           item {
+               // ---- RESULTADO ----
+               Card(modifier = Modifier.fillMaxWidth()) {
+                   Column(modifier = Modifier.padding(12.dp)) {
+                       Text(
+                           text = "Resultado valoración",
+                           style = MaterialTheme.typography.titleMedium
+                       )
+
+                       Spacer(Modifier.height(6.dp))
+
+                       Text("Rojos: ${resultadoAvd.rojos}")
+                       Text("Amarillos: ${resultadoAvd.amarillos}")
+                       Text("Verdes: ${resultadoAvd.verdes}")
+
+                       Spacer(Modifier.height(6.dp))
+
+                       Text(
+                           text = resultadoAvd.etiqueta,
+                           style = MaterialTheme.typography.titleLarge
+                       )
+                   }
+               }
+
+           }
             item {
+                OutlinedButton(
+                    onClick = onGenerarInforme,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Generar informe PDF")
+                }
+            }
+
+            item {
+
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(12.dp)) {
                         Text("Actividades (AVD)", style = MaterialTheme.typography.titleMedium)

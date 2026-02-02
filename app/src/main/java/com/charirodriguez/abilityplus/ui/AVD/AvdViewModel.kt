@@ -10,6 +10,15 @@ import com.charirodriguez.abilityplus.data.local.entity.seed.ActividadBvdEntity
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
+data class ResultadoAvd(
+    val rojos: Int,
+    val amarillos: Int,
+    val verdes: Int,
+    val puntos: Int,
+    val grado: Int,
+    val etiqueta: String
+)
+
 class AvdViewModel(
     private val personaId: Long,
     private val actividadDao: ActividadBvdDao,
@@ -24,6 +33,61 @@ class AvdViewModel(
         valoracionDao.getByPersona(personaId)
             .map { list -> list.associate { it.actividadId to it.semaforo } }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyMap())
+
+    val resultado: StateFlow<ResultadoAvd> =
+        combine(actividades, valoraciones) { acts, vals ->
+            // Contamos sobre TODAS las actividades del catálogo (11)
+            var rojos = 0
+            var amarillos = 0
+            var verdes = 0
+            var puntos = 0
+
+            acts.forEach { act ->
+                val semaforo = vals[act.id] ?: 0  // si no hay valoración, lo tratamos como VERDE (0)
+
+                when {
+                    semaforo >= 2 -> { // rojo
+                        rojos++
+                        puntos += 2
+                    }
+                    semaforo == 1 -> { // amarillo
+                        amarillos++
+                        puntos += 1
+                    }
+                    else -> { // verde (0 o null)
+                        verdes++
+                    }
+                }
+            }
+
+            // Umbrales MVP (11 actividades => puntos max 22)
+            val grado = when {
+                puntos >= 16 -> 3
+                puntos >= 9 -> 2
+                puntos >= 3 -> 1
+                else -> 0
+            }
+
+            val etiqueta = when (grado) {
+                3 -> "Grado 3 (gran dependencia)"
+                2 -> "Grado 2 (dependencia severa)"
+                1 -> "Grado 1 (dependencia moderada)"
+                else -> "Sin grado"
+            }
+
+            ResultadoAvd(
+                rojos = rojos,
+                amarillos = amarillos,
+                verdes = verdes,
+                puntos = puntos,
+                grado = grado,
+                etiqueta = etiqueta
+            )
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = ResultadoAvd(0, 0, 0, 0, 0, "Sin grado")
+        )
 
     fun setSemaforo(actividadId: Int, semaforo: Int) {
         viewModelScope.launch {

@@ -16,6 +16,12 @@ import com.charirodriguez.abilityplus.ui.perfil.PerfilFuncionalScreen
 import com.charirodriguez.abilityplus.ui.persona.PersonaFormScreen
 import com.charirodriguez.abilityplus.ui.persona.PersonaViewModel
 import com.charirodriguez.abilityplus.ui.persona.PersonaViewModelFactory
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,6 +66,7 @@ fun AbilityPlusApp() {
                 }
             }
         }
+
         is AppRoute.PersonaList -> {
             val context = LocalContext.current
 
@@ -72,14 +79,17 @@ fun AbilityPlusApp() {
                     factory = PersonaViewModelFactory(repo)
                 )
 
-            val personas by personaViewModel.personasActivas.collectAsState()
+            val personas by personaViewModel.personasMostradas.collectAsState()
+            val mostrarEliminadas by personaViewModel.mostrarEliminadas.collectAsState()
 
             Scaffold(
                 topBar = {
                     TopAppBar(title = { Text("Expedientes") })
                 },
                 floatingActionButton = {
-                    FloatingActionButton(onClick = { route = AppRoute.PersonaForm(personaId = null) }) {
+                    FloatingActionButton(onClick = {
+                        route = AppRoute.PersonaForm(personaId = null)
+                    }) {
                         Text("+")
                     }
                 }
@@ -96,9 +106,18 @@ fun AbilityPlusApp() {
                     Button(onClick = { route = AppRoute.Login }) {
                         Text("Salir")
                     }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Mostrar eliminadas")
+                        Spacer(Modifier.width(12.dp))
+                        Switch(
+                            checked = mostrarEliminadas,
+                            onCheckedChange = { personaViewModel.setMostrarEliminadas(it) }
+                        )
+                    }
+
 
                     if (personas.isEmpty()) {
-                        Text("No hay expedientes. Pulsa + para crear uno.")
+                        Text("No hay expedientes")
                     } else {
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             items(personas) { persona ->
@@ -111,19 +130,58 @@ fun AbilityPlusApp() {
 
                                         Spacer(Modifier.height(8.dp))
 
-                                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                            OutlinedButton(
-                                                onClick = { route = AppRoute.PersonaForm(personaId = persona.id) }
-                                            ) {
-                                                Text("Datos personales")
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+
+                                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                                OutlinedButton(
+                                                    onClick = {
+                                                        route =
+                                                            AppRoute.PersonaForm(personaId = persona.id)
+                                                    }
+                                                ) {
+                                                    Text("Datos personales")
+                                                }
+
+                                                Button(
+                                                    onClick = {
+                                                        route =
+                                                            AppRoute.PerfilFuncional(personaId = persona.id)
+                                                    }
+                                                ) {
+                                                    Text("Perfil funcional")
+                                                }
+                                            }
+                                            if (persona.activo) {
+                                                IconButton(onClick = {
+                                                    personaViewModel.eliminarPersona(
+                                                        persona
+                                                    )
+                                                }) {
+                                                    Icon(
+                                                        imageVector = androidx.compose.material.icons.Icons.Default.Delete,
+                                                        contentDescription = "Eliminar"
+                                                    )
+                                                }
+                                            } else {
+                                                IconButton(onClick = {
+                                                    personaViewModel.restaurarPersona(
+                                                        persona
+                                                    )
+                                                }) {
+                                                    Icon(
+                                                        imageVector = androidx.compose.material.icons.Icons.Default.Refresh,
+                                                        contentDescription = "Restaurar"
+                                                    )
+                                                }
                                             }
 
-                                            Button(
-                                                onClick = { route = AppRoute.PerfilFuncional(personaId = persona.id) }
-                                            ) {
-                                                Text("Perfil funcional")
-                                            }
+
                                         }
+
+
                                     }
                                 }
                             }
@@ -159,6 +217,7 @@ fun AbilityPlusApp() {
 
             val perfilViewModel: com.charirodriguez.abilityplus.ui.perfil.PerfilFuncionalViewModel =
                 androidx.lifecycle.viewmodel.compose.viewModel(
+                    key = "perfil-${r.personaId}",
                     factory = com.charirodriguez.abilityplus.ui.perfil.PerfilFuncionalViewModelFactory(
                         personaId = r.personaId,
                         dao = db.PersonaDiagnosticoDao()
@@ -168,13 +227,13 @@ fun AbilityPlusApp() {
             val cieSeleccionado by perfilViewModel.cieSeleccionado.collectAsState()
 
             val cifViewModel: com.charirodriguez.abilityplus.ui.perfil.PerfilFuncionalCifViewModel =
-            androidx.lifecycle.viewmodel.compose.viewModel(
-                factory = com.charirodriguez.abilityplus.ui.perfil.PerfilFuncionalCifViewModelFactory(
-                    personaId = r.personaId,
-                    dao = db.personaCifDao()
+                androidx.lifecycle.viewmodel.compose.viewModel(
+                    key = "cif-${r.personaId}",
+                    factory = com.charirodriguez.abilityplus.ui.perfil.PerfilFuncionalCifViewModelFactory(
+                        personaId = r.personaId,
+                        dao = db.personaCifDao()
+                    )
                 )
-            )
-
 
 
             val cifsSeleccionadas by cifViewModel.cifsSeleccionadas.collectAsState()
@@ -182,6 +241,7 @@ fun AbilityPlusApp() {
 
             val avdViewModel: com.charirodriguez.abilityplus.ui.avd.AvdViewModel =
                 androidx.lifecycle.viewmodel.compose.viewModel(
+                    key = "avd-${r.personaId}",
                     factory = com.charirodriguez.abilityplus.ui.avd.AvdViewModelFactory(
                         personaId = r.personaId,
                         actividadDao = db.actividadBvdDao(),
@@ -191,6 +251,8 @@ fun AbilityPlusApp() {
 
             val actividades by avdViewModel.actividades.collectAsState()
             val valoraciones by avdViewModel.valoraciones.collectAsState()
+            val resultadoAvd by avdViewModel.resultado.collectAsState()
+            val context = LocalContext.current
 
             PerfilFuncionalScreen(
                 personaId = r.personaId,
@@ -202,15 +264,42 @@ fun AbilityPlusApp() {
                 cieSeleccionado = cieSeleccionado,
                 onSeleccionarCie = { codigo -> perfilViewModel.seleccionarCie(codigo) },
                 cifsSeleccionadas = cifsSeleccionadas,
+                resultadoAvd = resultadoAvd,
                 onToggleCif = { codigo -> cifViewModel.toggleCif(codigo) },
-                onCambiarSemaforo = { actividadId, semaforo -> avdViewModel.setSemaforo(actividadId, semaforo) },
+                onCambiarSemaforo = { actividadId, semaforo ->
+                    avdViewModel.setSemaforo(
+                        actividadId,
+                        semaforo
+                    )
+                },
                 onVolverDatosPersonales = { route = AppRoute.PersonaForm(personaId = r.personaId) },
-                onFinalizar = { route = AppRoute.PersonaList }
+                onFinalizar = { route = AppRoute.PersonaList },
+                onGenerarInforme = {
+                        val data = com.charirodriguez.abilityplus.ui.report.InformePerfilData(
+                            numeroExpediente = "EXP-${r.personaId}",
+                            personaId = r.personaId,
+                            cieCodigo = cieSeleccionado,
+                            cifsSeleccionadas = cifsSeleccionadas,
+                            rojos = resultadoAvd.rojos,
+                            amarillos = resultadoAvd.amarillos,
+                            verdes = resultadoAvd.verdes,
+                            etiquetaResultado = resultadoAvd.etiqueta
+                        )
 
-                )}
+                        com.charirodriguez.abilityplus.ui.report.generarPdfYCompartir(
+                            context = context,
+                            data = data
+                        )
+                    },
 
+                    // luego lo relleno
 
+                )
         }
     }
+    }
+
+
+
 
 
