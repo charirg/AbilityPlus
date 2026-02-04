@@ -1,27 +1,58 @@
 package com.charirodriguez.abilityplus.ui
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.charirodriguez.abilityplus.R
 import com.charirodriguez.abilityplus.data.local.db.AbilityPlusDatabase
 import com.charirodriguez.abilityplus.data.repository.PersonaRepository
 import com.charirodriguez.abilityplus.ui.navigation.AppRoute
 import com.charirodriguez.abilityplus.ui.perfil.PerfilFuncionalScreen
+import com.charirodriguez.abilityplus.ui.perfil.PerfilPersonaHeaderViewModel
+import com.charirodriguez.abilityplus.ui.perfil.PerfilPersonaHeaderViewModelFactory
 import com.charirodriguez.abilityplus.ui.persona.PersonaFormScreen
 import com.charirodriguez.abilityplus.ui.persona.PersonaViewModel
 import com.charirodriguez.abilityplus.ui.persona.PersonaViewModelFactory
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,7 +64,9 @@ fun AbilityPlusApp() {
 
     val diagnosticoViewModel: com.charirodriguez.abilityplus.ui.diagnostico.DiagnosticoViewModel =
         androidx.lifecycle.viewmodel.compose.viewModel(
-            factory = com.charirodriguez.abilityplus.ui.diagnostico.DiagnosticoViewModelFactory(diagnosticoDao)
+            factory = com.charirodriguez.abilityplus.ui.diagnostico.DiagnosticoViewModelFactory(
+                diagnosticoDao
+            )
         )
 
     val diagnosticos by diagnosticoViewModel.diagnosticos.collectAsState()
@@ -54,18 +87,35 @@ fun AbilityPlusApp() {
 
         is AppRoute.Login -> {
             Scaffold { padding ->
-                Box(
+                Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding),
-                    contentAlignment = Alignment.Center
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
+
+                    Image(
+                        painter = painterResource(id = R.drawable.logo_abilityplus),
+                        contentDescription = "Logo AbilityPlus",
+                        modifier = Modifier
+                            .size(420.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.surface,
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                            .padding(12.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
                     Button(onClick = { route = AppRoute.PersonaList }) {
-                        Text("Entrar")
+                        Text("Iniciar sesión")
                     }
                 }
             }
         }
+
 
         is AppRoute.PersonaList -> {
             val context = LocalContext.current
@@ -86,13 +136,7 @@ fun AbilityPlusApp() {
                 topBar = {
                     TopAppBar(title = { Text("Expedientes") })
                 },
-                floatingActionButton = {
-                    FloatingActionButton(onClick = {
-                        route = AppRoute.PersonaForm(personaId = null)
-                    }) {
-                        Text("+")
-                    }
-                }
+
             ) { padding ->
 
                 Column(
@@ -103,17 +147,23 @@ fun AbilityPlusApp() {
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
 
-                    Button(onClick = { route = AppRoute.Login }) {
-                        Text("Salir")
+                    ExtendedFloatingActionButton(onClick = { route = AppRoute.PersonaForm(personaId = null)
+                    }) {
+                        Text("Crear nuevo expediente",
+                        modifier = Modifier.fillMaxWidth()
+                        )
+
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Mostrar eliminadas")
+                        Text("Mostrar expedientes eliminados")
                         Spacer(Modifier.width(12.dp))
                         Switch(
                             checked = mostrarEliminadas,
                             onCheckedChange = { personaViewModel.setMostrarEliminadas(it) }
                         )
                     }
+
+
 
 
                     if (personas.isEmpty()) {
@@ -127,6 +177,9 @@ fun AbilityPlusApp() {
                                             text = "Expediente: ${persona.numeroExpediente}",
                                             style = MaterialTheme.typography.titleMedium
                                         )
+                                        if (persona.ultimoInformeMillis != null) {
+                                            Text("Informe generado ✅", style = MaterialTheme.typography.bodySmall)
+                                        }
 
                                         Spacer(Modifier.height(8.dp))
 
@@ -145,7 +198,7 @@ fun AbilityPlusApp() {
                                                     Text("Datos personales")
                                                 }
 
-                                                Button(
+                                                OutlinedButton(
                                                     onClick = {
                                                         route =
                                                             AppRoute.PerfilFuncional(personaId = persona.id)
@@ -187,6 +240,16 @@ fun AbilityPlusApp() {
                             }
                         }
                     }
+                    Spacer(Modifier.height(16.dp))
+
+                    Button(
+                        onClick = { route = AppRoute.Login },
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    ) {
+                        Text("Finalizar sesión")
+                    }
+
+
                 }
             }
         }
@@ -220,9 +283,13 @@ fun AbilityPlusApp() {
                     key = "perfil-${r.personaId}",
                     factory = com.charirodriguez.abilityplus.ui.perfil.PerfilFuncionalViewModelFactory(
                         personaId = r.personaId,
-                        dao = db.PersonaDiagnosticoDao()
+                        dao = db.PersonaDiagnosticoDao(),
+                        personaDao = db.personaDao()
                     )
                 )
+            LaunchedEffect(r.personaId) {
+                perfilViewModel.asegurarFechaValoracion()
+            }
 
             val cieSeleccionado by perfilViewModel.cieSeleccionado.collectAsState()
 
@@ -234,7 +301,6 @@ fun AbilityPlusApp() {
                         dao = db.personaCifDao()
                     )
                 )
-
 
             val cifsSeleccionadas by cifViewModel.cifsSeleccionadas.collectAsState()
             val cifError by cifViewModel.error.collectAsState()
@@ -254,6 +320,24 @@ fun AbilityPlusApp() {
             val resultadoAvd by avdViewModel.resultado.collectAsState()
             val context = LocalContext.current
 
+            val headerViewModel: PerfilPersonaHeaderViewModel =
+                viewModel(
+                    factory = PerfilPersonaHeaderViewModelFactory(
+                        personaId = r.personaId,
+                        personaDao = db.personaDao()
+                    )
+                )
+
+            val persona by headerViewModel.persona.collectAsState()
+
+            LaunchedEffect(persona?.fechaValoracionMillis) {
+                val p = persona ?: return@LaunchedEffect
+                if (p.fechaValoracionMillis == null) {
+                    val ahora = System.currentTimeMillis()
+                    db.personaDao().setFechaValoracion(p.id, ahora)
+                }
+            }
+
             PerfilFuncionalScreen(
                 personaId = r.personaId,
                 diagnosticos = diagnosticos,
@@ -267,37 +351,40 @@ fun AbilityPlusApp() {
                 resultadoAvd = resultadoAvd,
                 onToggleCif = { codigo -> cifViewModel.toggleCif(codigo) },
                 onCambiarSemaforo = { actividadId, semaforo ->
-                    avdViewModel.setSemaforo(
-                        actividadId,
-                        semaforo
-                    )
+                    avdViewModel.setSemaforo(actividadId, semaforo)
                 },
                 onVolverDatosPersonales = { route = AppRoute.PersonaForm(personaId = r.personaId) },
                 onFinalizar = { route = AppRoute.PersonaList },
+                numeroExpediente = persona?.numeroExpediente ?: "EXP-${r.personaId}",
+                fechaValoracionMillis = persona?.fechaValoracionMillis,
                 onGenerarInforme = {
-                        val data = com.charirodriguez.abilityplus.ui.report.InformePerfilData(
-                            numeroExpediente = "EXP-${r.personaId}",
-                            personaId = r.personaId,
-                            cieCodigo = cieSeleccionado,
-                            cifsSeleccionadas = cifsSeleccionadas,
-                            rojos = resultadoAvd.rojos,
-                            amarillos = resultadoAvd.amarillos,
-                            verdes = resultadoAvd.verdes,
-                            etiquetaResultado = resultadoAvd.etiqueta
-                        )
+                            val ahora = System.currentTimeMillis()
+                            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO)
+                                .launch {
+                                    db.personaDao().setUltimoInforme(r.personaId, ahora)
+                                }
+                    com.charirodriguez.abilityplus.ui.informe.PdfReport.generarYCompartir(
+                        context = context,
+                        expediente = persona?.numeroExpediente ?: "EXP-${r.personaId}",
+                        cie = cieSeleccionado,
+                        cifs = cifsSeleccionadas,
+                        rojos = resultadoAvd.rojos,
+                        amarillos = resultadoAvd.amarillos,
+                        verdes = resultadoAvd.verdes,
+                        etiqueta = resultadoAvd.etiqueta,
+                        fechaValoracionMillis = persona?.fechaValoracionMillis
+                    )
 
-                        com.charirodriguez.abilityplus.ui.report.generarPdfYCompartir(
-                            context = context,
-                            data = data
-                        )
-                    },
+                }
 
-                    // luego lo relleno
-
-                )
+            )
         }
     }
-    }
+}
+
+
+
+
 
 
 

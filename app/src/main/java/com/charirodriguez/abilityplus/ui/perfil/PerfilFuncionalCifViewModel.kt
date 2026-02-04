@@ -54,6 +54,7 @@ class PerfilFuncionalCifViewModel(
             _error.value = null
         }
     }
+
 }
 
 class PerfilFuncionalCifViewModelFactory(

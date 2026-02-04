@@ -29,5 +29,13 @@ data class PersonaEntity(
     val sexo: String? = null,
 
     // Borrado lógico
-    val activo: Boolean = true
-)
+    val activo: Boolean = true,
+
+
+    val ultimoInformeMillis: Long? = null,
+
+    // Fecha de valoración
+    val fechaValoracionMillis: Long? = null,
+
+
+    )

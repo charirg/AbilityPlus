@@ -3,6 +3,7 @@ package com.charirodriguez.abilityplus.ui.perfil
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.charirodriguez.abilityplus.data.local.dao.PersonaDao
 import com.charirodriguez.abilityplus.data.local.dao.PersonaDiagnosticoDao
 import com.charirodriguez.abilityplus.data.local.entity.PersonaDiagnosticoEntity
 import kotlinx.coroutines.flow.SharingStarted
@@ -12,9 +13,25 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class PerfilFuncionalViewModel(
-    private val personaId: Long,
-    private val personaDiagnosticoDao: PersonaDiagnosticoDao
+private val personaId: Long,
+private val personaDiagnosticoDao: PersonaDiagnosticoDao,
+private val personaDao: PersonaDao
 ) : ViewModel() {
+
+    fun asegurarFechaValoracion() {
+        viewModelScope.launch {
+            val persona = personaDao.getById(personaId) ?: return@launch
+
+            if (persona.fechaValoracionMillis == null) {
+                personaDao.update(
+                    persona.copy(
+                        fechaValoracionMillis = System.currentTimeMillis()
+                    )
+                )
+            }
+        }
+    }
+
 
     // aquí exponemos SOLO el código (ej "G30") o null
     val cieSeleccionado: StateFlow<String?> =
@@ -36,14 +53,21 @@ class PerfilFuncionalViewModel(
             )
         }
     }
+
 }
 
 class PerfilFuncionalViewModelFactory(
     private val personaId: Long,
-    private val dao: PersonaDiagnosticoDao
+    private val dao: PersonaDiagnosticoDao,
+    private val personaDao: PersonaDao
 ) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
+
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return PerfilFuncionalViewModel(personaId, dao) as T
+        return PerfilFuncionalViewModel(
+            personaId,
+            dao,
+            personaDao
+        ) as T
     }
 }
+

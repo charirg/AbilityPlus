@@ -30,5 +30,11 @@ interface PersonaDao {
     @Query("SELECT * FROM persona WHERE activo = 0 ORDER BY numeroExpediente ASC")
     fun getEliminadas(): Flow<List<PersonaEntity>>
 
+    @Query("UPDATE persona SET ultimoInformeMillis = :millis WHERE id = :personaId")
+    suspend fun setUltimoInforme(personaId: Long, millis: Long)
+    @Query("UPDATE persona SET fechaValoracionMillis = :millis WHERE id = :personaId")
+    suspend fun setFechaValoracion(personaId: Long, millis: Long)
+
+
 }
 

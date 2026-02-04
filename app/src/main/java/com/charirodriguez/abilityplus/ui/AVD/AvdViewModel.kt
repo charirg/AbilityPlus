@@ -43,22 +43,28 @@ class AvdViewModel(
             var puntos = 0
 
             acts.forEach { act ->
-                val semaforo = vals[act.id] ?: 0  // si no hay valoración, lo tratamos como VERDE (0)
+                val semaforo = vals[act.id] ?: 0  // 0 = sin valorar
 
-                when {
-                    semaforo >= 2 -> { // rojo
+                when (semaforo) {
+                    3 -> { // 🔴 rojo
                         rojos++
                         puntos += 2
                     }
-                    semaforo == 1 -> { // amarillo
+                    2 -> { // 🟡 amarillo
                         amarillos++
                         puntos += 1
                     }
-                    else -> { // verde (0 o null)
+                    1 -> { // 🟢 verde
                         verdes++
+                        // 0 puntos
+                    }
+                    else -> {
+                        // ⚫ sin valorar -> no contamos como verde
                     }
                 }
             }
+
+
 
             // Umbrales MVP (11 actividades => puntos max 22)
             val grado = when {
@@ -69,10 +75,10 @@ class AvdViewModel(
             }
 
             val etiqueta = when (grado) {
-                3 -> "Grado 3 (gran dependencia)"
-                2 -> "Grado 2 (dependencia severa)"
-                1 -> "Grado 1 (dependencia moderada)"
-                else -> "Sin grado"
+                3 -> "Grado 3: Gran dependencia."
+                2 -> "Grado 2: Dependencia severa."
+                1 -> "Grado 1: Dependencia moderada."
+                else -> "Sin grado."
             }
 
             ResultadoAvd(

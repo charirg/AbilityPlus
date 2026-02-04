@@ -45,7 +45,7 @@ import com.charirodriguez.abilityplus.data.local.dao.PersonaCifDao
         PersonaCifEntity::class,
 
     ],
-    version = 5,
+    version = 7,
     exportSchema = false
 )
 abstract class AbilityPlusDatabase : RoomDatabase() {

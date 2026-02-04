@@ -10,10 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.charirodriguez.abilityplus.data.local.entity.PersonaEntity
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.Instant
-import java.time.format.DateTimeFormatter
 
 
 
@@ -110,6 +106,7 @@ private fun PersonaList(
 }
 
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 
@@ -139,144 +136,159 @@ private fun PersonaList(
 
     var errorFecha by remember { mutableStateOf<String?>(null) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(
-            text = if (personaInicial == null) "Nueva persona" else "Editar persona",
-            style = MaterialTheme.typography.titleLarge
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = numeroExpediente,
-            onValueChange = { numeroExpediente = it },
-            label = { Text("Número de expediente") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        var sexoExpanded by remember { mutableStateOf(false) }
-        val opcionesSexo = listOf("M", "F", "X")
-
-        ExposedDropdownMenuBox(
-            expanded = sexoExpanded,
-            onExpandedChange = { sexoExpanded = !sexoExpanded }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Datos personales") }
+            )
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp)
         ) {
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             OutlinedTextField(
-                value = sexo ?: "",
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Sexo") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = sexoExpanded) },
-                modifier = Modifier
-                    .menuAnchor()
-                    .fillMaxWidth()
+                value = numeroExpediente,
+                onValueChange = { numeroExpediente = it },
+                label = { Text("Número de expediente") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
             )
 
-            ExposedDropdownMenu(
+            Spacer(modifier = Modifier.height(12.dp))
+
+            var sexoExpanded by remember { mutableStateOf(false) }
+            val opcionesSexo = listOf("M", "F", "X")
+
+            ExposedDropdownMenuBox(
                 expanded = sexoExpanded,
-                onDismissRequest = { sexoExpanded = false }
+                onExpandedChange = { sexoExpanded = !sexoExpanded }
             ) {
-                DropdownMenuItem(
-                    text = { Text("Sin especificar") },
-                    onClick = {
-                        sexo = null
-                        sexoExpanded = false
-                    }
+                OutlinedTextField(
+                    value = sexo ?: "",
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Sexo") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = sexoExpanded) },
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth()
                 )
-                opcionesSexo.forEach { opcion ->
+
+                ExposedDropdownMenu(
+                    expanded = sexoExpanded,
+                    onDismissRequest = { sexoExpanded = false }
+                ) {
                     DropdownMenuItem(
-                        text = { Text(opcion) },
+                        text = { Text("Sin especificar") },
                         onClick = {
-                            sexo = opcion
+                            sexo = null
                             sexoExpanded = false
                         }
                     )
+                    opcionesSexo.forEach { opcion ->
+                        DropdownMenuItem(
+                            text = { Text(opcion) },
+                            onClick = {
+                                sexo = opcion
+                                sexoExpanded = false
+                            }
+                        )
+                    }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-        OutlinedTextField(
-            value = edadValoracionText,
-            onValueChange = { nuevo ->
-                edadValoracionText = nuevo.filter { it.isDigit() }.take(3)
-            },
-            label = { Text("Edad (valoración)") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = fechaNacimientoText,
-            onValueChange = { fechaNacimientoText = it },
-            label = { Text("Fecha nacimiento (YYYY-MM-DD)") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-
-        )
-
-        errorFecha?.let {
-            Text(
-                text = it,
-                color = MaterialTheme.colorScheme.error
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        errorMensaje?.let {
-            Text(
-                text = it,
-                color = MaterialTheme.colorScheme.error
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button(
-                onClick = {
-                    val edadValoracion = edadValoracionText.toIntOrNull()
-                    val fechaMillis = if (fechaNacimientoText.isBlank()) {
-                        personaInicial?.fechaNacimientoMillis
-
-                    } else {
-                        try {
-                            java.time.LocalDate.parse(fechaNacimientoText)
-                                .atStartOfDay(java.time.ZoneId.systemDefault())
-                                .toInstant()
-                                .toEpochMilli()
-                        } catch (e: Exception) {
-                            errorFecha = "Fecha inválida. Usa YYYY-MM-DD"
-                            return@Button
-                        }
-                    }
-
-                    errorFecha = null
-                    onGuardar(numeroExpediente.trim(), sexo, edadValoracion, fechaMillis)
+            OutlinedTextField(
+                value = edadValoracionText,
+                onValueChange = { nuevo ->
+                    edadValoracionText = nuevo.filter { it.isDigit() }.take(3)
                 },
+                label = { Text("Edad (valoración)") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-                enabled = numeroExpediente.isNotBlank()
+            Spacer(modifier = Modifier.height(12.dp))
 
-            ) {
-                Text("Guardar")
+            OutlinedTextField(
+                value = fechaNacimientoText,
+                onValueChange = { fechaNacimientoText = it },
+                label = { Text("Fecha nacimiento (YYYY-MM-DD)") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+
+            )
+
+            errorFecha?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error
+                )
             }
 
-            OutlinedButton(onClick = onCancelar) {
-                Text("Cancelar")
+            Spacer(modifier = Modifier.height(16.dp))
+
+            errorMensaje?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colorScheme.error
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Button(
+                    modifier = Modifier.width(140.dp),
+                    onClick = {
+                        val edadValoracion = edadValoracionText.toIntOrNull()
+                        val fechaMillis = if (fechaNacimientoText.isBlank()) {
+                            personaInicial?.fechaNacimientoMillis
+
+                        } else {
+                            try {
+                                java.time.LocalDate.parse(fechaNacimientoText)
+                                    .atStartOfDay(java.time.ZoneId.systemDefault())
+                                    .toInstant()
+                                    .toEpochMilli()
+                            } catch (e: Exception) {
+                                errorFecha = "Fecha inválida. Usa YYYY-MM-DD"
+                                return@Button
+                            }
+                        }
+
+                        errorFecha = null
+                        onGuardar(numeroExpediente.trim(), sexo, edadValoracion, fechaMillis)
+                    },
+
+                    enabled = numeroExpediente.isNotBlank()
+
+                ) {
+                    Text("Guardar")
+
+                }
+
+
+                Spacer(Modifier.width(12.dp))
+
+                Button(
+                    modifier = Modifier.width(140.dp),
+                    onClick = onCancelar
+                ) { Text("Cancelar") }
+                }
+
             }
         }
     }
-}
 
 @Composable
 private fun PersonaItem(

@@ -31,21 +31,36 @@ fun AvdScreen(
                     Spacer(Modifier.height(8.dp))
 
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        SemaforoButton("🟢", estado == 0) {
+
+                        // ⚫ SIN VALORAR
+                        SemaforoButton("⚫", estado == 0) {
                             onCambiarSemaforo(actividad.id, 0)
                         }
-                        SemaforoButton("🟡", estado == 1) {
+
+                        // 🟢 VERDE (1)
+                        SemaforoButton("🟢", estado == 1) {
                             onCambiarSemaforo(actividad.id, 1)
                         }
-                        SemaforoButton("🔴", estado == 2) {
+
+                        // 🟡 AMARILLO (2)
+                        SemaforoButton("🟡", estado == 2) {
                             onCambiarSemaforo(actividad.id, 2)
                         }
+
+                        // 🔴 ROJO (3)
+                        SemaforoButton("🔴", estado == 3) {
+                            onCambiarSemaforo(actividad.id, 3)
+                        }
                     }
+
+
+                }
+
                 }
             }
         }
     }
-}
+
 
 @Composable
 private fun SemaforoButton(
