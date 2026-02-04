@@ -161,3 +161,22 @@ UI → ViewModel → Repository → Dao → Base de datos.
 - Revisión general.
 - Pequeñas mejoras estéticas.
 - Preparación de documentación, presentación y vídeo.
+
+## Entrada
+- **Fecha:** 2026-02-04 (miércoles)
+- **Commit:** feat: cerrar MVP flujo expedientes → perfil funcional + informe PDF
+- **Zona tocada:** flujo MVP, expedientes, perfil funcional, PDF, Room/seed
+
+### Qué hice
+- Cerré el MVP funcional con flujo completo operativo en emulador.
+- Login ficticio con pantalla inicial (logo + “Iniciar sesión”).
+- Pantalla Expedientes: crear, listar activos, mostrar eliminados, eliminar/restaurar, cerrar sesión.
+- Indicador “Informe generado ✅” por expediente cuando ya existe PDF.
+- Datos personales (form) con UI ajustada (título y botones centrados).
+- Perfil funcional: CIE (1), CIF (máx. 5), AVD semáforo (incluye “sin valorar”) y resultado automático de dependencia.
+- Botón “Generar informe PDF” bloqueado hasta cumplir requisitos + generación y compartición desde la app.
+- Room con precarga (seed) de catálogos (CIE, CIF, AVD) y persistencia por persona.
+- Limpieza de duplicados/archivos fantasma y consolidación del generador PDF definitivo.
+
+### Pendiente
+- Verificar mañana que la “fecha de valoración” se mantiene estable al editar (check de consistencia).
