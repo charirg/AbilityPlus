@@ -96,3 +96,5 @@ Versión MVP funcional desarrollada como proyecto final del ciclo DAM.
 ## Repositorio
 
 Proyecto desarrollado por Rosario Rodríguez González.
+
+Este proyecto refleja la implementación completa de un flujo funcional real, desde la gestión de datos hasta la generación de informes, simulando un entorno profesional de desarrollo.
