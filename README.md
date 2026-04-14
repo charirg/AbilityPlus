@@ -59,7 +59,7 @@ La aplicación sigue una arquitectura por capas:
 - DAO
 - Base de datos Room
 
-## 💡 Enfoque del proyecto
+## Enfoque del proyecto
 
 Este proyecto simula un flujo real de valoración profesional, conectando diagnóstico, funcionalidad y desempeño en una única herramienta, con una lógica estructurada y orientada a uso práctico.
 
