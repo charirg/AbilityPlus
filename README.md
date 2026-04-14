@@ -1,6 +1,6 @@
 # Ability+
-
-Aplicación Android desarrollada como Trabajo Final de Ciclo (DAM), orientada a profesionales del ámbito sociosanitario para apoyar la valoración funcional de personas.
+Aplicación Android desarrollada en Kotlin para apoyar la valoración funcional en el ámbito sociosanitario, integrando CIE-10, CIF y BVD en un flujo estructurado.
+Desarrollada como Trabajo Final de Ciclo (DAM).
 
 ## Tecnologías utilizadas
 
